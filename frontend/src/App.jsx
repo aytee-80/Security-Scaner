@@ -184,7 +184,7 @@ function App() {
         <section className="scanner-card">
           <div className="scanner-header">
             <div>
-              <span className="section-label">01 — Input</span>
+              <span className="section-label">01 Input</span>
               <h3>Select a project</h3>
             </div>
             <span className="mono-hint">{ALLOWED_EXTENSIONS.length} extensions supported</span>
@@ -247,7 +247,7 @@ function App() {
           <section className="report">
             <div className="report-header">
               <div className="report-header-text">
-                <span className="section-label">02 — Result</span>
+                <span className="section-label">02 Result</span>
                 <h2>Security report</h2>
                 <p>{report.summary}</p>
               </div>
@@ -390,7 +390,7 @@ function App() {
 
       <footer className="footer">
         <span>SecureCode</span>
-        <span className="mono-hint">local filtering — no dependency upload</span>
+        <span className="mono-hint">local filtering</span>
       </footer>
     </div>
   );
