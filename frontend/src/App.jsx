@@ -17,6 +17,7 @@ const ALLOWED_EXTENSIONS = [
   ".scss", ".json", ".xml", ".yml", ".yaml", ".properties", ".conf"
 ];
 
+const API_URL = import.meta.env.VITE_API_URL;
 /* ---------- helpers ---------- */
 
 function shouldIncludeFile(file) {
@@ -120,7 +121,7 @@ function App() {
         formData.append("project", file, file.webkitRelativePath || file.name);
       });
 
-      const response = await fetch("http://localhost:5000/api/project/scan", {
+      const response = await fetch(`${API_URL}/api/project/scan`, {
         method: "POST",
         body: formData,
       });
