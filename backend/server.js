@@ -21,12 +21,7 @@ const upload = multer({
         fileSize: 2 * 1024 * 1024,
         fieldSize: 1024 * 1024
     },
-    fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.txt|\.pdf|\.docx$/)) {
-            return cb(new Error('Only .txt, .pdf, and .docx files are allowed!'));
-        }
-        cb(null, true);
-    }
+    
 });
 
 app.get("/", (req, res) => {
