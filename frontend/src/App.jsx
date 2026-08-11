@@ -17,68 +17,16 @@ const ALLOWED_EXTENSIONS = [
   ".scss", ".json", ".xml", ".yml", ".yaml", ".properties", ".conf"
 ];
 
-/* ---------- icons ---------- */
-
-const Icon = {
-  shield: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M12 3 4.5 6v6c0 4.5 3.2 7.9 7.5 9 4.3-1.1 7.5-4.5 7.5-9V6L12 3Z" />
-    </svg>
-  ),
-  folder: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
-    </svg>
-  ),
-  file: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
-      <path d="M14 3v5h5" />
-    </svg>
-  ),
-  search: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" />
-    </svg>
-  ),
-  check: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="m4.5 12.5 5 5L20 7" />
-    </svg>
-  ),
-  alert: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M12 4 3 19.5h18L12 4Z" /><path d="M12 10v4" /><path d="M12 17h.01" />
-    </svg>
-  ),
-  arrow: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
-    </svg>
-  ),
-};
-
 /* ---------- helpers ---------- */
 
 function shouldIncludeFile(file) {
   const relativePath = file.webkitRelativePath || file.name;
   const parts = relativePath.split("/");
-
   if (parts.some((part) => IGNORED_DIRECTORIES.includes(part))) return false;
-
   const fileName = parts[parts.length - 1];
   if (IGNORED_FILES.includes(fileName)) return false;
-
   const lastDot = fileName.lastIndexOf(".");
   if (lastDot === -1) return false;
-
   return ALLOWED_EXTENSIONS.includes(fileName.substring(lastDot).toLowerCase());
 }
 
@@ -98,7 +46,7 @@ function getScoreClass(score) {
   return "danger";
 }
 
-/* ---------- small presentational pieces ---------- */
+/* ---------- presentational ---------- */
 
 function Section({ label, children }) {
   return (
@@ -123,7 +71,7 @@ function ChangeList({ label, items }) {
     <Section label={label}>
       {items.map((change, i) => (
         <div className="change" key={i}>
-          <strong><Icon.file className="ico" /> {change.file}</strong>
+          <strong className="change-file">{change.file}</strong>
           {change.description && <p>{change.description}</p>}
           {change.code && <pre><code>{change.code}</code></pre>}
         </div>
@@ -145,7 +93,6 @@ function App() {
   function handleProjectSelect(event) {
     const files = Array.from(event.target.files || []);
     const filteredFiles = files.filter(shouldIncludeFile);
-
     setSelectedFiles(filteredFiles);
     setReport(null);
     setStatusKind("idle");
@@ -185,7 +132,9 @@ function App() {
         throw new Error("The server returned an invalid response.");
       }
 
-      if (!response.ok) throw new Error(data.message || "Project scan failed.");
+      if (!response.ok) {
+        throw new Error(data.message || "Project scan failed.");
+      }
 
       if (!data || typeof data.securityScore !== "number" || !Array.isArray(data.vulnerabilities)) {
         throw new Error("The analyzer returned a malformed report.");
@@ -209,11 +158,8 @@ function App() {
     <div className="app">
       <header className="navbar">
         <div className="brand">
-          <span className="brand-icon"><Icon.shield /></span>
-          <span className="brand-text">
-            <strong>SecureCode</strong>
-            <em>static analysis console</em>
-          </span>
+          <span className="brand-name">SecureCode</span>
+          <span className="brand-sub">static analysis</span>
         </div>
         <div className="nav-meta">
           <span className="dot" data-state={isScanning ? "busy" : "idle"} />
@@ -224,14 +170,13 @@ function App() {
       <main className="container">
         <section className="hero">
           <p className="eyebrow">Source review</p>
-          <h2>
-            Locate weaknesses in your codebase,<br />
-            with the reasoning behind every finding.
-          </h2>
+          <h1>
+            Find security weaknesses<br />
+            before attackers do.
+          </h1>
           <p className="hero-lead">
-            Point the scanner at a project directory. Files are filtered locally against
-            an ignore ruleset before anything leaves your machine, then analyzed for
-            injection, authentication, secret handling and configuration defects.
+            Only two reponses are returned per scan so you might want to re upload the same folder mutiple times to get a more complete picture of the security posture of your project.
+            Don't upload big files the ai is free plan has limited credits
           </p>
         </section>
 
@@ -252,7 +197,7 @@ function App() {
               multiple
               onChange={handleProjectSelect}
             />
-            <Icon.folder className="picker-icon" />
+            <span className="picker-icon-text">+</span>
             <strong>Choose project directory</strong>
             <span>Dependencies, lockfiles and environment files are excluded automatically</span>
           </label>
@@ -287,9 +232,7 @@ function App() {
             onClick={uploadProject}
             disabled={isScanning || selectedFiles.length === 0}
           >
-            <Icon.search className="ico" />
-            {isScanning ? "Analyzing project" : "Run security scan"}
-            {!isScanning && <Icon.arrow className="ico trail" />}
+            {isScanning ? "Analyzing project..." : "Run security scan"}
           </button>
 
           {uploadStatus && (
@@ -302,7 +245,7 @@ function App() {
         {report && (
           <section className="report">
             <div className="report-header">
-              <div>
+              <div className="report-header-text">
                 <span className="section-label">02 — Result</span>
                 <h2>Security report</h2>
                 <p>{report.summary}</p>
@@ -332,21 +275,19 @@ function App() {
 
               {report.vulnerabilities.length === 0 ? (
                 <div className="no-findings">
-                  <Icon.check className="ok-icon" />
+                  <div className="ok-icon">✓</div>
                   <h3>No significant vulnerabilities identified</h3>
                   <p>
                     The analysis did not surface material issues in the supplied source.
-                    Re-run after any change to authentication, data access or deployment config.
+                    Re-run after any change to authentication, data access, or deployment config.
                   </p>
                 </div>
               ) : (
                 report.vulnerabilities.map((v, index) => (
                   <article className="finding" key={index}>
-                    <div className="finding-rail" data-severity={getSeverityClass(v.severity)} />
-
                     <div className="finding-body">
                       <div className="finding-meta">
-                        <span className={"severity " + getSeverityClass(v.severity)}>
+                        <span className={"severity-badge " + getSeverityClass(v.severity)}>
                           {v.severity}
                         </span>
                         {v.category && <span className="category">{v.category}</span>}
@@ -356,11 +297,11 @@ function App() {
 
                       <h3>{v.title}</h3>
 
-                      <p className="file-location">
-                        <Icon.file className="ico" />
-                        {v.file}
-                        {v.line && <span> : {v.line}</span>}
-                      </p>
+                      {(v.file || v.line) && (
+                        <p className="file-location">
+                          {v.file}{v.line && <span> : line {v.line}</span>}
+                        </p>
+                      )}
 
                       {v.vulnerableCode && (
                         <CodeBlock label="Vulnerable code" code={v.vulnerableCode} />
@@ -392,7 +333,7 @@ function App() {
                       )}
 
                       {v.dependencies?.length > 0 && (
-                        <Section label="Depends on">
+                        <Section label="Dependencies">
                           <ul>{v.dependencies.map((d, i) => <li key={i}>{d}</li>)}</ul>
                         </Section>
                       )}
@@ -426,7 +367,7 @@ function App() {
 
                       {v.commonMistakes?.length > 0 && (
                         <div className="finding-section mistakes">
-                          <h4><Icon.alert className="ico" /> Common mistakes</h4>
+                          <h4>Common mistakes</h4>
                           <ul>{v.commonMistakes.map((m, i) => <li key={i}>{m}</li>)}</ul>
                         </div>
                       )}
@@ -448,7 +389,7 @@ function App() {
 
       <footer className="footer">
         <span>SecureCode</span>
-        <span className="mono-hint">local filtering · no dependency upload</span>
+        <span className="mono-hint">local filtering — no dependency upload</span>
       </footer>
     </div>
   );
